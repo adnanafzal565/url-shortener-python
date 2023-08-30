@@ -26,4 +26,14 @@ pip3 install uvicorn
 uvicorn api:app --reload
 ```
 
-You can access the project from this link: http://localhost:8080/
+Open terminal inside "node" folder and run the following command:
+
+```
+npm update
+```
+
+```
+nodemon server.js
+```
+
+You can access the project from the link: http://localhost:8080/
