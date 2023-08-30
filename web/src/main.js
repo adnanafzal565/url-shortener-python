@@ -8,11 +8,12 @@ import SignupComponent from "./components/SignupComponent.vue"
 import LoginComponent from "./components/LoginComponent.vue"
 
 const app = createApp(App)
-app.config.globalProperties.$api_url = "http://127.0.0.1:8000"
-app.config.globalProperties.$access_token_key = "access_token"
+app.config.globalProperties.$apiURL = "http://127.0.0.1:8000"
+app.config.globalProperties.$nodeURL = "http://localhost:3000"
+app.config.globalProperties.$accessTokenKey = "accessToken"
 app.config.globalProperties.$headers = {
 	headers: {
-		"Authorization": "Bearer " + localStorage.getItem("access_token")		
+		"Authorization": "Bearer " + localStorage.getItem("accessToken")		
 	}
 }
 

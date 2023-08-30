@@ -57,7 +57,7 @@
 
                 try {
                     const response = await axios.post(
-                        this.$api_url + "/signup",
+                        this.$apiURL + "/signup",
                         formData
                     );
                     

@@ -46,24 +46,24 @@
 
 		computed: {
 			user() {
-				return store.getters.get_user
+				return store.getters.getUser
 			}
 		},
 
 		methods: {
 			async logout() {
 				const formData = new FormData()
-				formData.append("access_token", localStorage.getItem(this.$access_token_key))
+				formData.append("access_token", localStorage.getItem(this.$accessTokenKey))
 				
 				try {
                     const response = await axios.post(
-                        this.$api_url + "/logout",
+                        this.$apiURL + "/logout",
                         formData
                     )
                     
                     if (response.data.status == "success") {
-                    	store.commit("set_user", null)
-                    	localStorage.removeItem(this.$access_token_key)
+                    	store.commit("setUser", null)
+                    	localStorage.removeItem(this.$accessTokenKey)
                     	this.$router.push("/login")
                     }
                 } catch (exp) {
@@ -71,20 +71,20 @@
                 }
 			},
 
-			async get_data() {
+			async getData() {
 				const formData = new FormData()
-				formData.append("access_token", localStorage.getItem(this.$access_token_key))
+				formData.append("access_token", localStorage.getItem(this.$accessTokenKey))
 				formData.append("timezone", Intl.DateTimeFormat().resolvedOptions().timeZone)
 				
 				try {
                     const response = await axios.post(
-                        this.$api_url + "/me",
+                        this.$apiURL + "/me",
                         formData,
                         this.$headers
                     )
                     
                     if (response.data.status == "success") {
-                    	store.commit("set_user", response.data.user)
+                    	store.commit("setUser", response.data.user)
                     }
                 } catch (exp) {
                     console.log(exp)
@@ -93,7 +93,7 @@
 		},
 
 		mounted() {
-			this.get_data()
+			this.getData()
 		}
 	}
 </script>

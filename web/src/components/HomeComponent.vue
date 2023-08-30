@@ -41,13 +41,22 @@
 	
 	import axios from "axios"
 	import swal from "sweetalert2"
+	import { io } from "socket.io-client"
+	import store from "../store"
 
 	export default {
 		name: "HomeComponent",
 
+		computed: {
+			user() {
+				return store.getters.getUser
+			}
+		},
+
 		data() {
 			return {
-				urls: []
+				urls: [],
+				socketIO: null
 			}
 		},
 
@@ -59,7 +68,7 @@
 
 				try {
 					const response = await axios.post(
-						this.$api_url + "/shorten-url",
+						this.$apiURL + "/shorten-url",
 						formData,
 						this.$headers
 					)
@@ -81,7 +90,7 @@
 
 				try {
 					const response = await axios.post(
-						this.$api_url + "/fetch-urls",
+						this.$apiURL + "/fetch-urls",
 						formData,
 						this.$headers
 					)
@@ -97,6 +106,33 @@
 
 		mounted() {
 			this.getData()
+		},
+
+		watch: {
+			user(to, from) {
+				const self = this
+
+				if (to != null && this.socketIO == null) {
+					this.socketIO = io(this.$nodeURL)
+					this.socketIO.emit("connected", to._id)
+
+					this.socketIO.on("urlViewed", function (urlId) {
+						for (let a = 0; a < self.urls.length; a++) {
+							if (self.urls[a]._id == urlId) {
+								self.urls[a].views++
+							}
+						}
+					})
+
+					this.socketIO.on("urlClicked", function (urlId) {
+						for (let a = 0; a < self.urls.length; a++) {
+							if (self.urls[a]._id == urlId) {
+								self.urls[a].clicks++
+							}
+						}
+					})
+				}
+			}
 		}
 	}
 </script>

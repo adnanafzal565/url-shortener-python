@@ -6,11 +6,11 @@
 				    border-radius: 5px;
 				    background-color: lightblue;
 				    cursor: pointer;">
-				    <span v-if="remaining_seconds > 0">
-				    	Redirecting in <span v-text="remaining_seconds"></span> seconds
+				    <span v-if="remainingSeconds > 0">
+				    	Redirecting in <span v-text="remainingSeconds"></span> seconds
 				    </span>
 					
-				    <span v-else v-on:click="goto_website">Go to website</span>
+				    <span v-else v-on:click="gotoWebsite">Go to website</span>
 				</div>
 			</div>
 		</div>
@@ -22,6 +22,7 @@
 	import axios from "axios"
 	import swal from "sweetalert2"
 	import detectChangeUrl from "detect-url-change"
+	import { io } from "socket.io-client"
 
 	export default {
 		name: "URLComponent",
@@ -29,23 +30,28 @@
 		data() {
 			return {
 				url: this.$route.params.url,
-				remaining_seconds: 5,
-				url_obj: null,
-				interval: null
+				remainingSeconds: 5,
+				urlObj: null,
+				interval: null,
+				socketIO: null
 			}
 		},
 
 		methods: {
-			async goto_website() {
-				if (this.url_obj == null) {
+			async gotoWebsite() {
+				if (this.urlObj == null) {
 					return
+				}
+
+				if (this.socketIO != null) {
+					this.socketIO.emit("urlClicked", this.urlObj._id)
 				}
 
 				const formData = new FormData()
 				formData.append("url", this.url)
-				window.navigator.sendBeacon((this.$api_url + "/url-clicked"), formData)
+				window.navigator.sendBeacon((this.$apiURL + "/url-clicked"), formData)
 
-				window.location.href = this.url_obj.url
+				window.location.href = this.urlObj.url
 			},
 
 			async getData() {
@@ -54,12 +60,15 @@
 
 				try {
 					const response = await axios.post(
-						this.$api_url + "/get-url",
+						this.$apiURL + "/get-url",
 						formData
 					)
 
 					if (response.data.status == "success") {
-						this.url_obj = response.data.url
+						this.urlObj = response.data.url
+
+						this.socketIO = io(this.$nodeURL)
+						this.socketIO.emit("urlViewed", this.urlObj._id)
 					} else {
 						swal.fire("Error", response.data.message, "error")
 					}
@@ -79,13 +88,13 @@
 
 			setTimeout(function () {
 				self.interval = setInterval(function () {
-					self.remaining_seconds--
+					self.remainingSeconds--
 
-					if (self.remaining_seconds <= 0) {
+					if (self.remainingSeconds <= 0) {
 						clearInterval(self.interval)
 
-						if (self.url_obj != null) {
-							// window.location.href = self.url_obj.url
+						if (self.urlObj != null) {
+							// window.location.href = self.urlObj.url
 						}
 					}
 				}, 1000)
